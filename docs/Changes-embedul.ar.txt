@@ -1,0 +1,41 @@
+Heavily modified Wolf4SDL ported to the embedul.ar framework to fit on
+resource-constrained embedded systems.
+
+Author: Santiago Germino.
+<sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
+
+Note that embedul.ar can build a PC/SDL executable. One can run this heavily
+modified Wolf4SDL with an order of magnitude less RAM and an even more
+retro-aesthetic look on a PC :)
+
+Changelog:
+
+- Engine code heavily modified to fit in 48 KB of SRAM, including the embedul.ar
+    framework itself.
+    objtype *actorat[x][y] changed to uint8_t actorat[x][y]. 16 kB -> 4 kB.
+    spotvis converted to bitfield and removed statobj_t->visspot. 4 kB -> 512 
+    bytes. Changed enum struct members with minimal datatype according to
+    enumerated values.
+    ... and more.
+- Video resolution changed from 4:3 320x200 to wide 16:9 256x144.
+    reworked splash screen images and menus to fit.
+- All images, sprites and graphics code converted from palettized to direct
+    RGB332 color. Removed gamepal, curpal and palette functions.
+    embedul.ar video drivers simulate palette flashes and fades with per-pixel
+    AND/OR operations.
+- Removed all unchained and VGA latched code.
+    Menu GUI functions now work on pixel units.
+- Project files originally written in "C" reverted to the .c extension.
+- Most datatypes converted to C99 standard sized types (stdint.h/stdbool.h).
+- Correct size of x86 real mode 16-bit int/longs variables using stdint.
+    Saves wasted bytes.
+- Removed evil #pragma pack(1) in wl_def.h.
+    Replaced global one-byte packing with a localized __attribute__((packed))
+    SoundCommon in id_sd.h.
+- Struct members rearranged to avoid automatic padding.
+- Changed bool to uint8_t (bool8 typedef) on array structs.
+    bool, as defined by stdbool.h, uses 4 bytes on 32-bit architectures
+- Included OPL2 simulator removed. embedul.ar framework includes a modified,
+    GPL-2 licensed source of "fmopl" from the MAME project.
+
+EOF
