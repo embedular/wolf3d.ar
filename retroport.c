@@ -447,10 +447,10 @@ bool RETROPORT_SD_Startup (void)
 }
 
 
-
-static inline void wlInput (const enum INPUT_Bit InB, const IN_Flags InFlags)
+static inline void wlInput (const enum INPUT_PROFILE_Type ProfileType,
+                            const uint32_t InB, const IN_Flags InFlags)
 {
-    if (INPUT_BitBuffer (InB))
+    if (INPUT_GetBitBuffer (ProfileType, InB))
     {
         InputStatus |= InFlags;
     }
@@ -463,20 +463,29 @@ static inline void wlInput (const enum INPUT_Bit InB, const IN_Flags InFlags)
 
 static void processInput ()
 {
-    wlInput (INPUT_Bit_P1Up, IN_Flags_KeyUp);
-    wlInput (INPUT_Bit_P1Left, IN_Flags_KeyLeft);
-    wlInput (INPUT_Bit_P1Right, IN_Flags_KeyRight);
-    wlInput (INPUT_Bit_P1Down, IN_Flags_KeyDown);
-    wlInput (INPUT_Bit_P1A, IN_Flags_KeyAttack);
-//  wlInput (INPUT_Bit_P1?, IN_Flags_KeyStrafe);
-    wlInput (INPUT_Bit_P1Start, IN_Flags_KeyUse);
-    wlInput (INPUT_Bit_P1B, IN_Flags_KeyRun);
-    wlInput (INPUT_Bit_P1Select, IN_Flags_KeyEsc);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Up,
+             IN_Flags_KeyUp);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Left,
+             IN_Flags_KeyLeft);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Right,
+             IN_Flags_KeyRight);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Down,
+             IN_Flags_KeyDown);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_A,
+             IN_Flags_KeyAttack);
+//  wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_?,
+//           IN_Flags_KeyStrafe);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Start,
+             IN_Flags_KeyUse);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_B,
+             IN_Flags_KeyRun);
+    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Select,
+             IN_Flags_KeyEsc);
 
-#if (LIB_EMBEDULAR_CONFIG_INPUT_SWITCH_ACTION == 1)
-    if (INPUT_SWITCH_ACTION (P2A, Clicked))
+#if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+    if (INPUT_CHECK_BIT_ACTION (GP1, A, Clicked))
 #else 
-    if (INPUT_BitBuffer (INPUT_Bit_P2A))
+    if (INPUT_GET_BIT_BUFFER (GP2, A))
 #endif
     {
         ++ s_scanlines;
@@ -488,10 +497,10 @@ static void processInput ()
         VIDEO_SetScanlines (s_scanlines);
     }
 
-#if (LIB_EMBEDULAR_CONFIG_INPUT_SWITCH_ACTION == 1)
-    if (INPUT_SWITCH_ACTION (P2B, Clicked))
+#if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+    if (INPUT_CHECK_BIT_ACTION (GP1, B, Clicked))
 #else
-    if (INPUT_BitBuffer (INPUT_Bit_P2B))
+    if (INPUT_GET_BIT_BUFFER (GP2, B))
 #endif
     {
         ++ s_bitops;

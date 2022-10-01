@@ -3,7 +3,7 @@ include $(LIB_EMBEDULAR_PATH)/embedul.ar/makefiles/system.mk
 LIB_EMBEDULAR_CONFIG := NEED_VIDEO=1 \
                         NEED_SOUND=1 \
                         SPLASH_SCREENS=1 \
-                        INPUT_SWITCH_ACTION=0
+                        INPUT_ACTION=1
 
 BUILD_LIBS += 3rd_party/fatfs
 
@@ -32,7 +32,7 @@ lpc4337jbd144_CFLAGS += -DBSS_SECTION_STATOBJLIST='CC_Section(".bss.$$RamAHB16")
 lpc4337jbd144_CFLAGS += -DRODATA_SECTION_ASSETS_SFX_SoundChunks_0='CC_Section(".rodata.$$Flash2")'
 lpc4337jbd144_CFLAGS += -DRODATA_SECTION_ASSETS_SFX_SoundChunks_1='CC_Section(".rodata.$$Flash2")'
 lpc4337jbd144_CFLAGS += -DRODATA_SECTION_ASSETS_SFX_SoundChunks_2='CC_Section(".rodata.$$Flash2")'
-lpc4337jbd144_CFLAGS += -DBSS_SECTION_RETROCIAA_SYSTEM='CC_Section(".bss.$$RamAHB16")'
+lpc4337jbd144_CFLAGS += -DBSS_SECTION_BOARD='CC_Section(".bss.$$RamAHB16")'
 lpc4337jbd144_CFLAGS += -DRODATA_SECTION_RETROCIAA_SPLASH_THEME='CC_Section(".rodata.$$Flash2")'
 lpc4337jbd144_CFLAGS += -DRODATA_SECTION_ASSETS_TILEMAP_nyancat='CC_Section(".rodata.$$Flash2")'
 lpc4337jbd144_CFLAGS += -DRODATA_SECTION_ASSETS_TILE_nyancat='CC_Section(".rodata.$$Flash2")'
