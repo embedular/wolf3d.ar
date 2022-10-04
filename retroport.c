@@ -483,7 +483,7 @@ static void processInput ()
              IN_Flags_KeyEsc);
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
-    if (INPUT_CHECK_BIT_ACTION (GP1, A, Clicked))
+    if (INPUT_CHECK_BIT_ACTION (GP2, A, Clicked))
 #else 
     if (INPUT_GET_BIT_BUFFER (GP2, A))
 #endif
@@ -498,7 +498,7 @@ static void processInput ()
     }
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
-    if (INPUT_CHECK_BIT_ACTION (GP1, B, Clicked))
+    if (INPUT_CHECK_BIT_ACTION (GP2, B, Clicked))
 #else
     if (INPUT_GET_BIT_BUFFER (GP2, B))
 #endif
