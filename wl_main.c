@@ -666,8 +666,7 @@ void FinishSignon (void)
         #endif
     #endif
 
-    VIDEO_CopyFrame ();
-    VH_UpdateScreen();
+    VW_UpdateScreen();  // was VH_UpdateScreen() (Needed the CopyFrame)
 
     if (!param_nowait)
         IN_Ack ();
@@ -685,8 +684,7 @@ void FinishSignon (void)
         US_CPrint ("Working...");
         #endif
 
-        VIDEO_CopyFrame ();
-        VH_UpdateScreen();
+        VW_UpdateScreen();  // was VH_UpdateScreen (needed the CopyFrame)
     #endif
 
     SETFONTCOLOR(0,15);

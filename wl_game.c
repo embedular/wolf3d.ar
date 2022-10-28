@@ -243,7 +243,7 @@ static void ScanInfoPlane(void)
     start = mapsegs[1];
     for (y=0;y<mapheight;y++)
     {
-        //RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        //RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
 
         for (x=0;x<mapwidth;x++)
         {
@@ -715,7 +715,7 @@ void SetupGameLevel (void)
     map = mapsegs[0];
     for (y=0;y<mapheight;y++)
     {
-        RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
 
         for (x=0;x<mapwidth;x++)
         {
@@ -750,7 +750,7 @@ void SetupGameLevel (void)
     map = mapsegs[0];
     for (y=0;y<mapheight;y++)
     {
-        RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
 
         for (x=0;x<mapwidth;x++)
         {
@@ -794,7 +794,7 @@ void SetupGameLevel (void)
     map = mapsegs[0];
     for (y=0;y<mapheight;y++)
     {
-        RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
 
         for (x=0;x<mapwidth;x++)
         {

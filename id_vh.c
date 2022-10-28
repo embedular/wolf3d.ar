@@ -21,7 +21,7 @@ void VWB_DrawPropString(const char* string)
 	uint8_t	    ch;
 	int i;
 
-	uint8_t *vbuf = VIDEO_Backbuffer ();
+	uint8_t *vbuf = RETROPORT_Backbuffer ();
 
 	font = (const fontstruct *) fontdata[fontnumber];
 	height = font->height;
@@ -72,14 +72,13 @@ void VW_MeasurePropString (const char *string, uint16_t *width, uint16_t *height
 
 void VH_UpdateScreen(void)
 {
-    RETROPORT_UpdateScreen (RETROPORT_FLIP_YES);
+    RETROPORT_UpdateScreen (0);
 }
 
 void VW_UpdateScreen(void)
 {
     // Partial updates on menu screens
-    VIDEO_CopyFrame ();
-    RETROPORT_UpdateScreen (RETROPORT_FLIP_YES);
+    RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_CopyFrame);
 }
 
 void VWB_DrawTile8 (int x, int y, int tile)
@@ -197,7 +196,7 @@ bool FizzleFade (int x1, int y1,
     IN_StartAck ();
 
     frame = GetTimeCount();
-    uint8_t *srcptr = VIDEO_Backbuffer (); // source
+    uint8_t *srcptr = RETROPORT_Backbuffer (); // source
 
     do
     {
@@ -205,11 +204,11 @@ bool FizzleFade (int x1, int y1,
 
         if(abortable && IN_CheckAck ())
         {
-            RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+            RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
             return true;
         }
 
-        uint8_t *destptr = VIDEO_Frontbuffer (); //VL_LockSurface(screen);
+        uint8_t *destptr = RETROPORT_Frontbuffer (); //VL_LockSurface(screen);
 
         if(destptr != NULL)
         {
@@ -256,7 +255,7 @@ bool FizzleFade (int x1, int y1,
                 if(!i || first) lastrndval = rndval;
             }
 
-            RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+            RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
         }
         else
         {
@@ -277,6 +276,6 @@ bool FizzleFade (int x1, int y1,
     } while (1);
 
 finished:
-    RETROPORT_UpdateScreen (RETROPORT_FLIP_YES);
+    RETROPORT_UpdateScreen (0);
     return false;
 }

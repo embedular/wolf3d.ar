@@ -1063,7 +1063,7 @@ PreloadGraphics (void)
     WindowW = 28 * 8;
     WindowH = 48;
 
-    RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+    RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
 
     for (uint32_t i = 0; i < 60; ++i)
     {

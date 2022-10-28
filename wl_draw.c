@@ -1656,7 +1656,7 @@ void    ThreeDRefresh (void)
     vbuf += screenofs;
     vbufPitch = bufferPitch;
 #endif
-    vbuf = VIDEO_Backbuffer ();
+    vbuf = RETROPORT_Backbuffer ();
     vbuf += screenofs;
 
     CalcViewVariables();

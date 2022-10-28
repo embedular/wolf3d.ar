@@ -50,10 +50,10 @@
 #define RETROPORT_SCREEN_HEIGHT     144
 
 
-enum RETROPORT_FLIP
+enum RETROPORT_UpdateFlags
 {
-    RETROPORT_FLIP_YES,
-    RETROPORT_FLIP_NO
+    RETROPORT_UpdateFlags_CopyFrame     = 0x01,
+    RETROPORT_UpdateFlags_SwapOverride  = 0x02
 };
 
 
@@ -68,8 +68,12 @@ uint32_t RETROPORT_GetTicks (void);
 void RETROPORT_Delay (uint32_t msec);
 void RETROPORT_WaitVBL (uint32_t times);
 void RETROPORT_FillFromStorage (uint32_t sector);
-void RETROPORT_UpdateScreen (enum RETROPORT_FLIP flip);
+void RETROPORT_UpdateScreen (const enum RETROPORT_UpdateFlags UpdateFlags);
+void RETROPORT_ClearBack (const uint8_t Color);
 void RETROPORT_SetVGAPlaneMode (void);
+uint8_t * RETROPORT_Frontbuffer (void);
+uint8_t * RETROPORT_Backbuffer (void);
+uint8_t * RETROPORT_BackbufferXY (const int32_t X, const int32_t Y);
 void RETROPORT_StartBonusFlash (void);
 void RETROPORT_StartDamageFlash (int damage);
 void RETROPORT_UpdateFlash (void);

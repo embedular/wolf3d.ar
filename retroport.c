@@ -25,8 +25,9 @@
 
 #include "retroport.h"
 #include "embedul.ar/source/core/device/video.h"
-#include "embedul.ar/source/core/device/video/fade.h"
-#include "embedul.ar/source/core/device/video/tilemap.h"
+#include "embedul.ar/source/core/manager/screen.h"
+#include "embedul.ar/source/core/manager/screen/fade.h"
+#include "embedul.ar/source/core/manager/screen/tilemap.h"
 #include "embedul.ar/source/core/manager/storage.h"
 #include "embedul.ar/source/core/manager/storage/cache.h"
 
@@ -47,7 +48,7 @@
     opl3_chip           g_opl3;
 #endif
 
-static struct VIDEO_FADE    s_fade;
+static struct SCREEN_FADE    s_fade;
 static uint8_t              s_scanlines = 0;
 static uint8_t              s_bitops    = 0;
 
@@ -68,7 +69,10 @@ void RETROPORT_Delay (uint32_t msec)
 {
     (void) msec;
 
-    VIDEO_SwapOverride  ();
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    VIDEO_SwapOverride  (C->driver);
     BOARD_Update        ();
 }
 
@@ -77,32 +81,81 @@ void RETROPORT_WaitVBL (uint32_t times)
 {
     (void) times;
 
-    VIDEO_SwapOverride  ();
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    VIDEO_SwapOverride  (C->driver);
     BOARD_Update        ();
 }
 
 
 void RETROPORT_FillFromStorage (const uint32_t CachedElement)
 {
-    VIDEO_CopyCachedFrame (CachedElement);
+    SCREEN_BlitCachedElement (SCREEN_Role_Primary, CachedElement);
 }
 
 
-void RETROPORT_UpdateScreen (enum RETROPORT_FLIP flip)
+void RETROPORT_UpdateScreen (const enum RETROPORT_UpdateFlags UpdateFlags)
 {
-    if (flip == RETROPORT_FLIP_NO)
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    if (UpdateFlags & RETROPORT_UpdateFlags_CopyFrame)
     {
-        VIDEO_SwapOverride ();
+        VIDEO_CopyFrame (C->driver);
+    }
+
+    if (UpdateFlags & RETROPORT_UpdateFlags_SwapOverride)
+    {
+
+        VIDEO_SwapOverride (C->driver);
     }
 
     BOARD_Update ();
 }
 
+
+void RETROPORT_ClearBack (const uint8_t Color)
+{
+    SCREEN_ClearBack (SCREEN_Role_Primary, Color);
+}
+
+
 // SEL 4 (so)
 
 void RETROPORT_SetVGAPlaneMode (void)
 {    
-    VIDEO_SetWaitVBICount (1);
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    VIDEO_SetWaitVBICount (C->driver, 1);
+}
+
+
+uint8_t * RETROPORT_Frontbuffer (void)
+{
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    return C->driver->frontbuffer;
+}
+
+
+uint8_t * RETROPORT_Backbuffer (void)
+{
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    return C->driver->backbuffer;
+}
+
+
+uint8_t * RETROPORT_BackbufferXY (const int32_t X, const int32_t Y)
+{
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    return SCREEN_Context__backbufferXY (C, X, Y);
 }
 
 
@@ -137,16 +190,17 @@ void RETROPORT_StatusDrawFace (uint32_t pic)
         return;
     }
 
-    VIDEO_TILEMAP_Draw (&TILEMAP_hud, 4, 108, anim, frame,
-                        NULL, NULL, NULL);
+    SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, 4, 108,
+                         anim, frame,
+                         NULL, NULL, NULL);
 }
 
 
 void RETROPORT_StatusDrawNumber (int x, int y, uint8_t number)
 {
-    VIDEO_TILEMAP_Draw (&TILEMAP_hud, x, y,
-                        TILEMAP_hud_numbers_INDEX, number,
-                        NULL, NULL, NULL);
+    SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, x, y,
+                         TILEMAP_hud_numbers_INDEX, number,
+                         NULL, NULL, NULL);
 }
 
 
@@ -155,27 +209,27 @@ void RETROPORT_StatusDrawWeapon (int pic)
     switch (pic)
     {
         case KNIFEPIC:
-            VIDEO_TILEMAP_Draw (&TILEMAP_hud, 205, 116,
-                                TILEMAP_hud_knife_INDEX, 0,
-                                NULL, NULL, NULL);
+            SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, 205, 116,
+                                 TILEMAP_hud_knife_INDEX, 0,
+                                 NULL, NULL, NULL);
             break;
 
         case GUNPIC:
-            VIDEO_TILEMAP_Draw (&TILEMAP_hud, 208, 113,
-                                TILEMAP_hud_gun_INDEX, 0,
-                                NULL, NULL, NULL);
+            SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, 208, 113,
+                                 TILEMAP_hud_gun_INDEX, 0,
+                                 NULL, NULL, NULL);
             break;
 
         case MACHINEGUNPIC:
-            VIDEO_TILEMAP_Draw (&TILEMAP_hud, 205, 119,
-                                TILEMAP_hud_machinegun_INDEX, 0,
-                                NULL, NULL, NULL);
+            SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, 205, 119,
+                                 TILEMAP_hud_machinegun_INDEX, 0,
+                                 NULL, NULL, NULL);
             break;
 
         case GATLINGGUNPIC:
-            VIDEO_TILEMAP_Draw (&TILEMAP_hud, 204, 114,
-                                TILEMAP_hud_gatlinggun_INDEX, 0,
-                                NULL, NULL, NULL);
+            SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, 204, 114,
+                                 TILEMAP_hud_gatlinggun_INDEX, 0,
+                                 NULL, NULL, NULL);
             break;
     }
 }
@@ -185,26 +239,26 @@ void RETROPORT_StatusDrawKeys (void)
 {
     if (gamestate.keys & 1)
     {
-        VIDEO_TILEMAP_Draw (&TILEMAP_hud, 187, 125,
-                            TILEMAP_hud_keygold_INDEX, 0,
-                            NULL, NULL, NULL);
+        SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, 187, 125,
+                             TILEMAP_hud_keygold_INDEX, 0,
+                             NULL, NULL, NULL);
     }
 
     if (gamestate.keys & 2)
     {
-        VIDEO_TILEMAP_Draw (&TILEMAP_hud, 195, 125,
-                            TILEMAP_hud_keysilver_INDEX, 0,
-                            NULL, NULL, NULL);
+        SCREEN_TILEMAP_Draw (SCREEN_Role_Primary, &TILEMAP_hud, 195, 125,
+                             TILEMAP_hud_keysilver_INDEX, 0,
+                             NULL, NULL, NULL);
     }
 }
 
 
-static int numreadysamples = 0;
-static int samplesPerMusicTick;
-static uint8_t *curAlSound = 0;
-static uint8_t *curAlSoundPtr = 0;
-static uint32_t curAlLengthLeft = 0;
-static int soundTimeCounter = 5;
+static int      numreadysamples     = 0;
+static int      samplesPerMusicTick;
+static uint8_t  * curAlSound        = 0;
+static uint8_t  * curAlSoundPtr     = 0;
+static uint32_t curAlLengthLeft     = 0;
+static int      soundTimeCounter    = 5;
 
 
 static bool wlProcBGMFunc (struct SOUND *a, uint8_t *buffer, void *procData)
@@ -212,8 +266,8 @@ static bool wlProcBGMFunc (struct SOUND *a, uint8_t *buffer, void *procData)
     (void) a;
     (void) procData;
 
-    int stereolen = SOUND_MIXER_BUFFER_SIZE>>1;
-    int sampleslen = stereolen>>1;
+    int stereolen = SOUND_MIXER_BUFFER_SIZE >> 1;
+    int sampleslen = stereolen >> 1;
     int16_t *stream16 = (int16_t *) (void *) buffer;    // expect correct alignment
 
     while(1)
@@ -222,21 +276,21 @@ static bool wlProcBGMFunc (struct SOUND *a, uint8_t *buffer, void *procData)
         {
             if(numreadysamples<sampleslen)
             {
-                #ifdef USE_FMOPL
+            #ifdef USE_FMOPL
                 FMOPL_YM3812_Update (OPL_CHIP, stream16, numreadysamples, true);
-                #else
+            #else
                 OPL3_GenerateStream (&g_opl3, stream16, numreadysamples);
-                #endif
+            #endif
                 stream16 += numreadysamples*2;
                 sampleslen -= numreadysamples;
             }
             else
             {
-                #ifdef USE_FMOPL
+            #ifdef USE_FMOPL
                 FMOPL_YM3812_Update (OPL_CHIP, stream16, sampleslen, true);
-                #else
+            #else
                 OPL3_GenerateStream (&g_opl3, stream16, sampleslen);
-                #endif
+            #endif
                 numreadysamples -= sampleslen;
                 return true;
             }
@@ -298,8 +352,8 @@ static bool wlProcBGMFunc (struct SOUND *a, uint8_t *buffer, void *procData)
 
 void RETROPORT_StartBonusFlash (void)
 {
-    VIDEO_FADE_Flash (&s_fade, VIDEO_FADE_Fx_Brighten, VIDEO_FADE_MASK_PASS_YELLOW,
-                96, 200, 0);
+    SCREEN_FADE_Flash (&s_fade, SCREEN_Role_Primary, SCREEN_FADE_Fx_Brighten,
+                       SCREEN_FADE_PassFilter_Yellow, 96, 200, 0);
 }
 
 
@@ -314,91 +368,100 @@ void RETROPORT_StartDamageFlash (int damage)
         damage = 128;
     }
 
-    VIDEO_FADE_Flash (&s_fade, VIDEO_FADE_Fx_Brighten, VIDEO_FADE_MASK_PASS_RED,
-                (uint8_t)damage, 300, 0);
+    SCREEN_FADE_Flash (&s_fade, SCREEN_Role_Primary, SCREEN_FADE_Fx_Brighten,
+                       SCREEN_FADE_PassFilter_Red, (uint8_t)damage, 300, 0);
 
 }
 
 
 void RETROPORT_UpdateFlash (void)
 {
-    if (VIDEO_FADE_Pending (&s_fade))
+    if (SCREEN_FADE_Pending (&s_fade))
     {
-        VIDEO_FADE_Update (&s_fade);
+        SCREEN_FADE_Update (&s_fade);
     }
 }
 
 
 void RETROPORT_FinishPaletteShifts (void)
 {
-    VIDEO_FADE_Cancel (&s_fade);
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
 
-    VIDEO_ResetScanlineOp (VIDEO_SOP_ShowAnd);
-    VIDEO_ResetScanlineOp (VIDEO_SOP_ShowOr);
+    SCREEN_FADE_Cancel (&s_fade);
+
+    VIDEO_ResetScanlineOp (C->driver, VIDEO_SOP_ShowAnd);
+    VIDEO_ResetScanlineOp (C->driver, VIDEO_SOP_ShowOr);
 }
 
 
 void RETROPORT_FadeOut (void)
 {
-    VIDEO_FADE_Out (&s_fade, VIDEO_FADE_Fx_Darken, 
-                        VIDEO_FADE_MASK_PASS_ALL, 100);
+    SCREEN_FADE_Out (&s_fade, SCREEN_Role_Primary, SCREEN_FADE_Fx_Darken, 
+                     SCREEN_FADE_PassFilter_All, 100);
 
-    while (VIDEO_FADE_Pending (&s_fade))
+    while (SCREEN_FADE_Pending (&s_fade))
     {
-        VIDEO_FADE_Update (&s_fade);
-        RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        SCREEN_FADE_Update (&s_fade);
+        RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
     }
 }
 
 
 void RETROPORT_FadeIn (void)
 {
-    VIDEO_FADE_In (&s_fade, VIDEO_FADE_Fx_Darken,
-                        VIDEO_FADE_MASK_PASS_ALL, 100);
+    SCREEN_FADE_In (&s_fade, SCREEN_Role_Primary, SCREEN_FADE_Fx_Darken,
+                    SCREEN_FADE_PassFilter_All, 100);
 
-    while (VIDEO_FADE_Pending (&s_fade))
+    while (SCREEN_FADE_Pending (&s_fade))
     {
-        VIDEO_FADE_Update (&s_fade);
-        RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        SCREEN_FADE_Update (&s_fade);
+        RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
     }
 }
 
 
 void RETROPORT_MenuFadeOut (void)
 {
-    VIDEO_SetScanlineOp (VIDEO_SOP_ShowAnd, 0b11000101);
-    VIDEO_FADE_Out (&s_fade, VIDEO_FADE_Fx_Brighten,
-                        VIDEO_FADE_MASK_PASS_RED, 70);
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    VIDEO_SetScanlineOp (C->driver, VIDEO_SOP_ShowAnd, 0b11000101);
+    SCREEN_FADE_Out (&s_fade, SCREEN_Role_Primary, SCREEN_FADE_Fx_Brighten,
+                     SCREEN_FADE_PassFilter_Red, 70);
 
     // MARQUEE_Flash (255, 300, 500);
 
-    while (VIDEO_FADE_Pending (&s_fade))
+    while (SCREEN_FADE_Pending (&s_fade))
     {
-        VIDEO_FADE_Update (&s_fade);
-        RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        SCREEN_FADE_Update (&s_fade);
+        RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
     }
 }
 
 
 void RETROPORT_MenuFadeIn (void)
 {
-    VIDEO_FADE_In (&s_fade, VIDEO_FADE_Fx_Brighten,
-                        VIDEO_FADE_MASK_PASS_RED, 70);
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
 
-    while (VIDEO_FADE_Pending (&s_fade))
+    SCREEN_FADE_In (&s_fade, SCREEN_Role_Primary, SCREEN_FADE_Fx_Brighten,
+                    SCREEN_FADE_PassFilter_Red, 70);
+
+    while (SCREEN_FADE_Pending (&s_fade))
     {
-        VIDEO_FADE_Update (&s_fade);
-        RETROPORT_UpdateScreen (RETROPORT_FLIP_NO);
+        SCREEN_FADE_Update (&s_fade);
+        RETROPORT_UpdateScreen (RETROPORT_UpdateFlags_SwapOverride);
     }
 
-    VIDEO_ResetScanlineOp (VIDEO_SOP_ShowAnd);
+    VIDEO_ResetScanlineOp (C->driver, VIDEO_SOP_ShowAnd);
 }
 
 
 bool RETROPORT_SD_Startup (void)
 {
-    // Init music
-    samplesPerMusicTick = MIX_SAMPLERATE / 700;    // SDL_t0FastAsmService played at 700Hz
+    // Init music (SDL_t0FastAsmService played at 700Hz)
+    samplesPerMusicTick = MIX_SAMPLERATE / 700;
 
     AdLibPresent = true;
     SoundBlasterPresent = true;
@@ -450,7 +513,7 @@ bool RETROPORT_SD_Startup (void)
 static inline void wlInput (const enum INPUT_PROFILE_Type ProfileType,
                             const uint32_t InB, const IN_Flags InFlags)
 {
-    if (INPUT_GetBitBuffer (ProfileType, InB))
+    if (INPUT_GetBuffer (ProfileType, IO_Type_Bit, InB))
     {
         InputStatus |= InFlags;
     }
@@ -461,7 +524,7 @@ static inline void wlInput (const enum INPUT_PROFILE_Type ProfileType,
 }
 
 
-static void processInput ()
+static void processInput (const struct SCREEN_Context *const C)
 {
     wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Up,
              IN_Flags_KeyUp);
@@ -494,7 +557,7 @@ static void processInput ()
             s_scanlines = 0;
         }
 
-        VIDEO_SetScanlines (s_scanlines);
+        VIDEO_SetScanlines (C->driver, s_scanlines);
     }
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
@@ -512,19 +575,19 @@ static void processInput ()
         switch (s_bitops)
         {
             case 0:
-                VIDEO_ResetAllScanlineOps ();
+                VIDEO_ResetAllScanlineOps (C->driver);
                 break;
             case 1:
-                VIDEO_SetScanlineOp   (VIDEO_SOP_ShowAnd, 0b00011100);
-                VIDEO_SetScanlineOp   (VIDEO_SOP_ShowOr, 0b01000001);
+                VIDEO_SetScanlineOp (C->driver, VIDEO_SOP_ShowAnd, 0b00011100);
+                VIDEO_SetScanlineOp (C->driver, VIDEO_SOP_ShowOr, 0b01000001);
                 break;
             case 2:
-                VIDEO_SetScanlineOp   (VIDEO_SOP_ShowAnd, 0b11100000);
-                VIDEO_SetScanlineOp   (VIDEO_SOP_ShowOr, 0b00001001);
+                VIDEO_SetScanlineOp (C->driver, VIDEO_SOP_ShowAnd, 0b11100000);
+                VIDEO_SetScanlineOp (C->driver, VIDEO_SOP_ShowOr, 0b00001001);
                 break;
             case 3:
-                VIDEO_SetScanlineOp   (VIDEO_SOP_ShowAnd, 0b00011111);
-                VIDEO_SetScanlineOp   (VIDEO_SOP_ShowOr, 0b00100000);
+                VIDEO_SetScanlineOp (C->driver, VIDEO_SOP_ShowAnd, 0b00011111);
+                VIDEO_SetScanlineOp (C->driver, VIDEO_SOP_ShowOr, 0b00100000);
                 break;
         }
     }
@@ -533,16 +596,22 @@ static void processInput ()
 
 void RETROPORT_ProcessEvents (void)
 {
-    processInput ();
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
+
+    processInput (C);
 }
 
 
 // Always used in a loop until some condition is met
 void RETROPORT_WaitAndProcessEvents (void)
 {
-    processInput ();
+    const struct SCREEN_Context *const C = 
+                                SCREEN_GetContext(SCREEN_Role_Primary);
 
-    VIDEO_SwapOverride  ();
+    processInput (C);
+
+    VIDEO_SwapOverride  (C->driver);
     BOARD_Update        ();
 }
 

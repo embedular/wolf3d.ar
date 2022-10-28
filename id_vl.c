@@ -130,7 +130,7 @@ void VL_Plot (uint16_t x, uint16_t y, uint8_t color)
     BOARD_Assert (x < screenWidth && y < screenHeight,
                 "Pixel out of bounds");
 
-    *VIDEO_BackbufferXY(x, y) = color;
+    * RETROPORT_BackbufferXY (x, y) = color;
 }
 
 /*
@@ -146,7 +146,7 @@ uint8_t VL_GetPixel (uint16_t x, uint16_t y)
     BOARD_Assert (x < screenWidth && y < screenHeight,
                 "Pixel out of bounds");
 
-    return *VIDEO_BackbufferXY(x, y);
+    return * RETROPORT_BackbufferXY (x, y);
 }
 
 
@@ -163,7 +163,7 @@ void VL_Hlin (uint16_t x, uint16_t y, uint16_t width, uint8_t color)
     BOARD_Assert (x + width <= screenWidth && y < screenHeight,
                 "Destination rectangle out of bounds");
 
-    uint8_t *ptr = VIDEO_BackbufferXY (x, y);
+    uint8_t *ptr = RETROPORT_BackbufferXY (x, y);
     memset (ptr, color, width);
 }
 
@@ -181,12 +181,12 @@ void VL_Vlin (uint16_t x, uint16_t y, uint16_t height, uint8_t color)
 	BOARD_Assert (x < screenWidth && y + height <= screenHeight,
                 "Destination rectangle out of bounds");
 
-	uint8_t *ptr = VIDEO_BackbufferXY (x, y);
+	uint8_t *ptr = RETROPORT_BackbufferXY (x, y);
 
 	while (height--)
 	{
 		*ptr = color;
-		ptr += VIDEO_Width ();
+		ptr += screenWidth;
 	}
 }
 
@@ -204,12 +204,12 @@ void VL_Bar (uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t co
 	BOARD_Assert (x + width <= screenWidth && y + height <= screenHeight,
                 "Destination rectangle out of bounds");
 
-	uint8_t *ptr = VIDEO_BackbufferXY (x, y);
+	uint8_t *ptr = RETROPORT_BackbufferXY (x, y);
 
 	while (height--)
 	{
 		memset (ptr, color, width);
-		ptr += VIDEO_Width ();
+		ptr += screenWidth;
 	}
 }
 
@@ -231,24 +231,23 @@ void VL_Bar (uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t co
 
 void VL_ClearScreen (uint8_t color)
 {
-    VIDEO_ClearBack (color);
+    RETROPORT_ClearBack (color);
 }
 
 
 void VL_MemToScreen (const uint8_t *source, uint16_t width, uint16_t height, uint16_t x, uint16_t y)
 {
-    uint8_t *vbuf = VIDEO_BackbufferXY (x, y);
-
     BOARD_Assert (source, "Invalid source");
 
-    BOARD_Assert (x + width <= VIDEO_Width()
-                && y + height <= VIDEO_Height(),
-                "Destination rectangle out of bounds");
+    BOARD_Assert (x + width <= screenWidth && y + height <= screenHeight,
+                  "Destination rectangle out of bounds");
+
+    uint8_t *vbuf = RETROPORT_BackbufferXY (x, y);
 
     for (int h = 0; h < height; ++h)
     {
         memcpy (vbuf, source, width);
-        vbuf += VIDEO_Width ();
+        vbuf += screenWidth;
         source += width;
     }
 }

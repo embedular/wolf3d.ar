@@ -533,7 +533,7 @@ const TILEMAP_hud_TYPE *const *const TILEMAP_hud_ANIMATIONS[TILEMAP_hud_INDEX_MA
 #ifdef RODATA_SECTION_ASSETS_TILEMAP_hud
 RODATA_SECTION_ASSETS_TILEMAP_hud
 #endif
-const struct VIDEO_TILEMAP_Metrics TILEMAP_hud_METRICS[TILEMAP_hud_INDEX_MAX] = {
+const struct SCREEN_TILEMAP_Metrics TILEMAP_hud_METRICS[TILEMAP_hud_INDEX_MAX] = {
 	{ .frames = TILEMAP_hud_face_FRAMES, .width = TILEMAP_hud_face_WIDTH, .height = TILEMAP_hud_face_HEIGHT, .bbw = TILEMAP_hud_face_BBW, .bbh = TILEMAP_hud_face_BBH },
 	{ .frames = TILEMAP_hud_dead_FRAMES, .width = TILEMAP_hud_dead_WIDTH, .height = TILEMAP_hud_dead_HEIGHT, .bbw = TILEMAP_hud_dead_BBW, .bbh = TILEMAP_hud_dead_BBH },
 	{ .frames = TILEMAP_hud_hehe_FRAMES, .width = TILEMAP_hud_hehe_WIDTH, .height = TILEMAP_hud_hehe_HEIGHT, .bbw = TILEMAP_hud_hehe_BBW, .bbh = TILEMAP_hud_hehe_BBH },
@@ -550,8 +550,8 @@ const struct VIDEO_TILEMAP_Metrics TILEMAP_hud_METRICS[TILEMAP_hud_INDEX_MAX] = 
 #ifdef RODATA_SECTION_ASSETS_TILEMAP_hud
 RODATA_SECTION_ASSETS_TILEMAP_hud
 #endif
-const struct VIDEO_TILEMAP TILEMAP_hud = {
-	.flags = VIDEO_TILEMAP_FLAG_PTR_TYPE_8_BIT,
+const struct SCREEN_TILEMAP TILEMAP_hud = {
+	.ptrType = SCREEN_TILEMAP_PtrType_8Bit,
 	.animations = TILEMAP_hud_INDEX_MAX,
 	.map8 = TILEMAP_hud_ANIMATIONS,
 	.tiles = TILES_hud,
