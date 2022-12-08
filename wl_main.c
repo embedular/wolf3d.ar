@@ -1412,10 +1412,10 @@ static void DemoLoop()
 ==========================
 */
 
-int wl_main (int argc, char *argv[])
+int wl_main (const int Argc, const char *const Argv[])
 {
-    (void) argc;
-    (void) argv;
+    (void) Argc;
+    (void) Argv;
 
     CheckForEpisodes();
 

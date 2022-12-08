@@ -24,7 +24,7 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/core/main.h"
 #include "embedul.ar/source/core/mempool.h"
 #include "embedul.ar/source/core/retros/api.h"
 
@@ -90,10 +90,9 @@ OS_TaskRetVal taskBoot (OS_TaskParam param)
 }
 
 
-int EMBEDULAR_Main (const int Argc, const char *const Argv[])
+void EMBEDULAR_Main (void *param)
 {
-    (void) Argc;
-    (void) Argv;
+    (void) param;
 
     MEMPOOL_Init (&s_MempoolHeap, (uintptr_t)s_Heap, sizeof(s_Heap));
 
@@ -106,6 +105,4 @@ int EMBEDULAR_Main (const int Argc, const char *const Argv[])
     const enum OS_Result OsStartResult = OS_Start (taskBoot, NULL);
 
     BOARD_AssertState (OsStartResult == OS_Result_OK);
-
-    return 0;
 }

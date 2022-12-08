@@ -48,7 +48,7 @@
     opl3_chip           g_opl3;
 #endif
 
-static struct SCREEN_FADE    s_fade;
+static struct SCREEN_FADE   s_fade;
 static uint8_t              s_scanlines = 0;
 static uint8_t              s_bitops    = 0;
 
@@ -61,7 +61,7 @@ void RETROPORT_Init (void)
 
 uint32_t RETROPORT_GetTicks (void)
 {
-    return (uint32_t) BOARD_TicksNow ();
+    return (uint32_t) TICKS_Now ();
 }
 
 
@@ -72,8 +72,8 @@ void RETROPORT_Delay (uint32_t msec)
     const struct SCREEN_Context *const C = 
                                 SCREEN_GetContext(SCREEN_Role_Primary);
 
-    VIDEO_SwapOverride  (C->driver);
-    BOARD_Update        ();
+    VIDEO_SwapOverride (C->driver);
+    BOARD_Sync ();
 }
 
 
@@ -84,8 +84,8 @@ void RETROPORT_WaitVBL (uint32_t times)
     const struct SCREEN_Context *const C = 
                                 SCREEN_GetContext(SCREEN_Role_Primary);
 
-    VIDEO_SwapOverride  (C->driver);
-    BOARD_Update        ();
+    VIDEO_SwapOverride (C->driver);
+    BOARD_Sync ();
 }
 
 
@@ -111,7 +111,7 @@ void RETROPORT_UpdateScreen (const enum RETROPORT_UpdateFlags UpdateFlags)
         VIDEO_SwapOverride (C->driver);
     }
 
-    BOARD_Update ();
+    BOARD_Sync ();
 }
 
 
@@ -510,10 +510,10 @@ bool RETROPORT_SD_Startup (void)
 }
 
 
-static inline void wlInput (const enum INPUT_PROFILE_Type ProfileType,
+static inline void wlInput (const enum INPUT_PROFILE_Group InProfileType,
                             const uint32_t InB, const IN_Flags InFlags)
 {
-    if (INPUT_GetBuffer (ProfileType, IO_Type_Bit, InB))
+    if (MIO_GetInputBuffer (InProfileType, IO_Type_Bit, InB))
     {
         InputStatus |= InFlags;
     }
@@ -526,29 +526,29 @@ static inline void wlInput (const enum INPUT_PROFILE_Type ProfileType,
 
 static void processInput (const struct SCREEN_Context *const C)
 {
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Up,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_Up,
              IN_Flags_KeyUp);
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Left,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_Left,
              IN_Flags_KeyLeft);
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Right,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_Right,
              IN_Flags_KeyRight);
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Down,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_Down,
              IN_Flags_KeyDown);
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_A,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_A,
              IN_Flags_KeyAttack);
-//  wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_?,
+//  wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_?,
 //           IN_Flags_KeyStrafe);
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Start,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_Start,
              IN_Flags_KeyUse);
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_B,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_B,
              IN_Flags_KeyRun);
-    wlInput (INPUT_PROFILE_Type_GP1, INPUT_PROFILE_GP1_Bit_Select,
+    wlInput (INPUT_PROFILE_Group_GP1, INPUT_PROFILE_GP1_Bit_Select,
              IN_Flags_KeyEsc);
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
-    if (INPUT_CHECK_BIT_ACTION (GP2, A, Clicked))
+    if (MIO_CHECK_INPUT_BIT_ACTION (GP2, A, Clicked))
 #else 
-    if (INPUT_GET_BIT_BUFFER (GP2, A))
+    if (MIO_GET_INPUT_BIT_BUFFER (GP2, A))
 #endif
     {
         ++ s_scanlines;
@@ -561,9 +561,9 @@ static void processInput (const struct SCREEN_Context *const C)
     }
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
-    if (INPUT_CHECK_BIT_ACTION (GP2, B, Clicked))
+    if (MIO_CHECK_INPUT_BIT_ACTION (GP2, B, Clicked))
 #else
-    if (INPUT_GET_BIT_BUFFER (GP2, B))
+    if (MIO_GET_INPUT_BIT_BUFFER (GP2, B))
 #endif
     {
         ++ s_bitops;
@@ -612,7 +612,7 @@ void RETROPORT_WaitAndProcessEvents (void)
     processInput (C);
 
     VIDEO_SwapOverride  (C->driver);
-    BOARD_Update        ();
+    BOARD_Sync        ();
 }
 
 

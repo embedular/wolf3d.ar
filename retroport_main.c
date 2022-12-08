@@ -23,14 +23,18 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/core/main.h"
 
 
 // defined in wl_main.c
-int wl_main (int argc, char *argv[]);
+int wl_main (const int Argc, const char *const Argv[]);
 
 
-int EMBEDULAR_Main (int argc, char *argv[])
+void EMBEDULAR_Main (void *param)
 {
-    return wl_main (argc, argv);
+    (void) param;
+
+    const int RetVal = wl_main (BOARD_Argc(), BOARD_Argv());
+
+    (void) RetVal;
 }
