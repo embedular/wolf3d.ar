@@ -1,4 +1,4 @@
-include $(LIB_EMBEDULAR_PATH)/embedul.ar/makefiles/system.mk
+include $(LIB_EMBEDULAR_BASE)/embedul.ar/makefiles/system.mk
 
 LIB_EMBEDULAR_CONFIG := NEED_VIDEO=1 \
                         NEED_SOUND=1 \
